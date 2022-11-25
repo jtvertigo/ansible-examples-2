@@ -1,0 +1,4 @@
+ansible_user: "toor"
+ansible_password: "1Qaz2Wsx"
+ansible_network_os: "cisco.ios.ios"
+napalm_platform: "ios"

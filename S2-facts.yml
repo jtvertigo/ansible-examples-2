@@ -1,0 +1,7 @@
+---
+
+- get_facts:
+    hostname: S2
+    model: IOSv
+    serial_number: 9HWNW5W7PKI
+    vendor: Cisco

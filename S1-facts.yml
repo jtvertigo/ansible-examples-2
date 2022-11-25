@@ -1,0 +1,8 @@
+---
+
+- get_facts:
+    hostname: S1
+    model: vEOS
+    os_version: 4.21.1.1F-10146868.42111F
+    serial_number: ''
+    vendor: Arista
