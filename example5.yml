@@ -1,0 +1,44 @@
+---
+
+- name: "Play 1"
+  hosts: localhost
+
+  tasks:
+    - name: "Collect Data Info"
+      ansible.builtin.setup:
+        filter:
+          - "ansible_date_time"
+
+    - name: "Save Info as Variable"
+      set_fact:
+        TD: "{{ ansible_date_time.date }}"
+
+- name: "Play 2"
+  hosts: all
+  connection: network_cli
+  
+  tasks: 
+    - name: "Create a Diff directory"
+      ansible.builtin.file:
+        path: "diffs/{{ hostvars.localhost.TD }}/{{ inventory_hostname }}"
+        state: directory
+      run_once: false
+
+    - name: "Use NAPALM to Restore Backup Configs"
+      napalm_install_config:
+        hostname: "{{ ansible_host }}"
+        username: "{{ ansible_user }}"
+        password: "{{ ansible_password }}"
+        dev_os: "{{ napalm_platform }}"
+        config_file: "Backups/2022-11-26/running-configs/{{ inventory_hostname }}-running-config.txt"
+        commit_changes: true
+        replace_config: true
+        get_diffs: true
+        diff_file: diffs/{{ hostvars.localhost.TD }}/{{ inventory_hostname }}/{{ inventory_hostname }}-diffs.txt
+        optional_args:
+          global_delay_factor: 3
+      register: result
+
+    - name: "Print result"
+      debug:
+        msg: "{{ result }}"
