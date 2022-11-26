@@ -1,0 +1,77 @@
+---
+
+- name: "SNMP Playbook for Cisco"
+  hosts: cisco
+  connection: network_cli
+
+  tasks:
+    - name: Apply the provided configuration
+      cisco.ios.ios_snmp_server:
+        config:
+          communities:
+          -   acl_v4: testACL
+              name: mergedComm
+              rw: true
+          contact: John VertiGO
+          engine_id:
+          -   id: AB0C5342FF0F
+              remote:
+                  host: 172.16.0.12
+                  udp_port: 25
+          groups:
+          -   group: mergedGroup
+              version: v3
+              version_option: auth
+          file_transfer:
+                  access_group: test
+                  protocol:
+                  - ftp
+          hosts:
+          -   community_string: mergedComm
+              host: 172.16.2.9
+              informs: true
+              traps:
+              - msdp
+              - stun
+              - pki
+              version: 2c
+        state: merged
+      register: snmp_output
+
+    - name: "Print SNMP"
+      debug:
+        msg: "{{ snmp_output }}"
+
+- name: "SNMP Playbook for VyOS"
+  hosts: vyos
+  connection: network_cli
+
+  tasks:
+    - name: Merge provided configuration with device configuration
+      vyos.vyos.vyos_snmp_server:
+        config:
+          communities:
+            - name: "switches"
+              authorization_type: "rw"
+            - name: "bridges"
+              clients: ["1.1.1.1", "12.1.1.10"]
+          contact: "admin2@ex.com"
+          listen_addresses:
+            - address: "20.1.1.1"
+            - address: "100.1.2.1"
+              port: 33
+          #snmp_v3:
+          #  users:
+          #    - user: admin_user
+          #      authentication:
+          #        plaintext_key: "1Qaz2Wsx"
+          #        type: "sha"
+          #      privacy:
+          #        plaintext_key: "1Qaz2Wsx"
+          #        type: "aes"
+        state: merged
+      register: snmp_vyos_output
+
+    - name: "Print VyOS SNMP"
+      debug:
+        msg: "{{ snmp_vyos_output }}"
